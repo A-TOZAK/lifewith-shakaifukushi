@@ -95,6 +95,11 @@ ol.src li{font-size:13px;word-break:break-all}
 <button class="primary" id="done">今日の学びを終えた</button>
 <div id="sched"></div></div>
 
+<section id="kakosec" hidden>
+<h2>国家試験の過去問</h2>
+<p class="note">公益財団法人 社会福祉振興・試験センターが公表している社会福祉士国家試験の問題です。問題の文言は変えていません。この教材のほかの部分は LiFE with が独自に作ったもので、試験センターとは関係ありません。法改正により、今は問題として成り立たないものがあります。</p>
+<div id="kako"></div>
+</section>
 <h2>専門家と国が発信している情報</h2>
 <p><b>法令（e-Gov法令検索）</b></p><ul><li><a href="https://laws.e-gov.go.jp/law/322AC0000000164" target="_blank" rel="noopener">児童福祉法</a>（デジタル庁 e-Gov法令検索）</li><li><a href="https://laws.e-gov.go.jp/law/412AC1000000082" target="_blank" rel="noopener">児童虐待の防止等に関する法律</a>（デジタル庁 e-Gov法令検索）</li><li><a href="https://laws.e-gov.go.jp/law/362AC0000000030" target="_blank" rel="noopener">社会福祉士及び介護福祉士法</a>（デジタル庁 e-Gov法令検索）</li></ul><p><b>国の指針と手引き</b></p><ul><li><a href="https://www.cfa.go.jp/policies/jidougyakutai" target="_blank" rel="noopener">児童虐待防止対策</a>（こども家庭庁）</li><li><a href="https://www.cfa.go.jp/policies/jidougyakutai/hourei-tsuuchi" target="_blank" rel="noopener">児童虐待に係る法令・指針等一覧</a>（こども家庭庁）</li><li><a href="https://www.mext.go.jp/a_menu/shotou/seitoshidou/1416474.htm" target="_blank" rel="noopener">学校・教育委員会等向け虐待対応の手引き</a>（文部科学省）</li></ul><p><b>資格と専門職</b></p><ul><li><a href="https://www.sssc.or.jp/shakai/" target="_blank" rel="noopener">社会福祉士国家試験</a>（公益財団法人 社会福祉振興・試験センター）</li><li><a href="https://www.jacsw.or.jp/" target="_blank" rel="noopener">日本社会福祉士会</a>（公益社団法人 日本社会福祉士会）</li></ul>
 <h2>出典</h2>
@@ -128,6 +133,14 @@ $("#tr").innerHTML=T.map((x,i)=>{const [w,t]=x.text.split("|");return `<p data-t
 $("#tr").querySelectorAll("p").forEach(p=>p.onclick=()=>{const a=$("#au");a.currentTime=+p.dataset.t;a.play()});
 let cur=-1;$("#au").addEventListener("timeupdate",()=>{const t=$("#au").currentTime;let k=-1;T.forEach((x,i)=>{if(x.t<=t)k=i});if(k!==cur){if(cur>=0)$("#l"+cur).classList.remove("now");if(k>=0){const p=$("#l"+k);p.classList.add("now");const box=$("#tr");box.scrollTop=p.offsetTop-box.offsetTop-80}cur=k}});
 
+
+if(D.kakomon&&D.kakomon.length){$("#kakosec").hidden=false;
+$("#kako").innerHTML=D.kakomon.map((k,i)=>`<div class="card"><p class="note">第${k.kai}回　問題${k.number}（${esc(k.subject)}）</p><p style="white-space:pre-wrap">${esc(k.stem)}</p>${k.choices.map((c,j)=>`<button class="choice" data-k="${i}" data-j="${j+1}">${j+1}　${esc(c)}</button>`).join("")}${k.note?`<p class="note" style="white-space:pre-wrap">${esc(k.note)}</p>`:""}<button class="choice" data-show="${i}" style="text-align:center;font-weight:700">答えを見る</button><div class="fb" id="kfb${i}"></div></div>`).join("");
+$("#kako").querySelectorAll("button.choice").forEach(b=>b.onclick=()=>{
+  if(b.dataset.show!==undefined){const k=D.kakomon[b.dataset.show],fb=$("#kfb"+b.dataset.show);fb.className="fb ok";
+    fb.innerHTML=`正答　${k.answer.join("・")}<br><a href="${esc(k.pdf_url)}" target="_blank" rel="noopener">試験センターの問題PDF（第${k.kai}回）</a>`;
+    $("#kako").querySelectorAll(`button[data-k="${b.dataset.show}"]`).forEach(x=>{if(k.answer.includes(+x.dataset.j))x.style.borderColor="var(--ok)"});return}
+  b.classList.toggle("picked");b.style.background=b.classList.contains("picked")?"#eef2f8":""});}
 $("#case").innerHTML=D.cases.map((c,i)=>`<div class="card"><p>${esc(c.scene)}</p>${c.choices.map((x,j)=>`<button class="choice" data-c="${i}" data-j="${j}">${esc(x.text)}</button>`).join("")}<div class="fb" id="cfb${i}"></div></div>`).join("");
 $("#case").querySelectorAll("button.choice").forEach(b=>b.onclick=()=>{const x=D.cases[b.dataset.c].choices[b.dataset.j],fb=$("#cfb"+b.dataset.c);fb.className="fb "+(x.good?"ok":"ng");fb.textContent=x.fb});
 
